@@ -1,0 +1,59 @@
+# This value determines how config files are loaded onto target machines.
+# The following are the only valid options:
+#
+# The workgroup name.
+adauth_workgroup: "example"
+
+# The domain name.
+adauth_realm: "example.com"
+
+# The primary domain controller url address.
+adauth_pdc: "pdc1.example.com"
+
+# The secondary domain controller url address.
+adauth_sdc: "sdc1.example.com"
+
+# The username for joining the domain.
+adauth_username: "username"
+
+# The password for joining the domain.
+adauth_password: "password"
+
+# Number of times services should attempt to reconnect in the event of a Data Provider 
+# crash or restart before they give up.
+sssd_reconnection_retries: "3"
+
+# If the authentication provider is offline, how long should we allow cached logins 
+# (in days since the last successful online login).
+sssd_offline_credentials_expiration: "5"
+
+# If the authentication provider is offline, how many failed login attempts are allowed.
+sssd_offline_failed_login_attempts: "3"
+
+# The time in minutes which has to pass after offline_failed_login_attempts has been 
+# reached before a new login attempt is possible.
+# If set to 0 the user cannot authenticate offline if offline_failed_login_attempts 
+# has been reached. Only a successful online authentication can enable offline 
+# authentication again.
+sssd_offline_failed_login_delay: "5"
+
+# Determines if user credentials are also cached in the local LDB cache
+# User credentials are stored in a SHA512 hash, not in plaintext
+sssd_cache_credentials: "true"
+
+# This option specifies time in seconds since last successful on-line authentication
+# for which the user will be authenticated using cached credentials while SSSD 
+# is in the on-line mode.
+sssd_cache_timeout: "120"
+
+# Specifies if the host principal should be canonicalized when connecting to 
+# LDAP server. This feature is available with MIT Kerberos >= 1.7
+sssd_krb5_canonicalize: "false"
+
+# If using access_provider = ldap and ldap_access_order = filter (default), 
+# this option is mandatory. It specifies an LDAP search filter criteria that 
+# must be met for the user to be granted access on this host. 
+# If access_provider = ldap, ldap_access_order = filter and this option is not set, 
+# it will result in all users being denied access. Use access_provider = permit 
+# to change this default behavior.
+sssd_ldap_access_filter: "(&(objectClass=user)(memberOf=OU=Domain Users,DC=example,DC=com))"

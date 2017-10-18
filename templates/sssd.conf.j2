@@ -1,0 +1,45 @@
+[sssd]
+config_file_version = 2
+domains = {{ adauth_realm | upper }}
+services = nss, pam, pac
+
+[nss]
+fallback_homedir = /home/%u
+override_shell=/bin/bash
+
+[pam]
+reconnection_retries = {{ sssd_reconnection_retries }}
+offline_credentials_expiration = {{ sssd_offline_credentials_expiration }}
+offline_failed_login_attempts = {{ sssd_offline_failed_login_attempts }}
+offline_failed_login_delay = {{ sssd_offline_failed_login_delay }}
+
+[domain/{{ adauth_realm | upper }}]
+cache_credentials = {{ sssd_cache_credentials }}
+{% if sssd_cache_credentials == "true" %}
+cached_auth_timeout = {{ sssd_cache_timeout }}
+{% endif %}
+id_provider = ad
+auth_provider = ad
+chpass_provider = ad
+access_provider = ad
+
+krb5_canonicalize = {{ sssd_krb5_canonicalize }}
+krb5_realm = {{ adauth_realm | upper }}
+krb5_server = {{ adauth_pdc  }}
+krb5_kpasswd = {{ adauth_pdc  }}
+
+ldap_disable_referrals = true
+ldap_force_upper_case_realm = true
+ldap_id_mapping = True
+
+ldap_sasl_authid = {{ ansible_hostname | upper }}$@{{ adauth_realm | upper }}
+ldap_sasl_mech = GSSAPI
+
+ldap_schema = ad
+ad_server = {{ adauth_pdc  }}
+ad_backup_server = {{ adauth_sdc }}
+
+access_provider = ldap
+ldap_access_order = filter, expire
+ldap_account_expire_policy = ad
+ldap_access_filter = {{ sssd_ldap_access_filter }}

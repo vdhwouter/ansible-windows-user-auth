@@ -1,0 +1,17 @@
+[global]
+   netbios name = {{ ansible_hostname | upper }}
+   workgroup = {{ adauth_workgroup | upper }}
+   client signing = yes
+   client use spnego = yes
+   encrypt passwords = yes
+   kerberos method = secrets and keytab
+
+   log file = /var/log/samba/%m.log
+   realm = {{ adauth_realm | upper }}
+   security = ads
+
+   template shell = /bin/bash
+   template homedir = /home/%U
+
+   idmap config * : backend = tdb
+   idmap config * : range = 10000-20000

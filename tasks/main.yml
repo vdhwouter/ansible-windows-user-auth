@@ -1,0 +1,5 @@
+---
+- include: misc.yml
+- include: samba.yml
+- include: kerberos.yml
+- include: sssd.yml

@@ -1,0 +1,76 @@
+---
+- name: Install SSSD and related
+  yum: pkg={{ item }} state=present
+  with_items:
+    - sssd
+    - sssd-tools
+    - oddjob-mkhomedir
+    - authconfig
+
+- name: Check if authconfig did a previous run
+  command: "/bin/egrep '^auth.*sufficient.*pam_sss.so' /etc/pam.d/system-auth"
+  register: authconfig_run
+  changed_when: false
+  ignore_errors: true
+
+- name: Backup existing nsswitch configuration
+  copy:
+    src: /etc/nsswitch.conf
+    dest: /etc/nsswitch.conf.bak
+    owner: root
+    group: root
+    mode: 644
+
+- name: Backup existing pam system-auth configuration
+  copy:
+    src: /etc/pam.d/system-auth
+    dest: /etc/pam.d/system-auth.bak
+    owner: root
+    group: root
+    mode: 644
+
+- name: Backup existing pam password-auth configuration
+  copy:
+    src: /etc/pam.d/password-auth
+    dest: /etc/pam.d/password-auth.bak
+    owner: root
+    group: root
+    mode: 644
+
+- name: Configure server to use SSSD for authentication 
+  command: /usr/sbin/authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall --nostart
+  when: authconfig_run.rc != 0
+
+- name: Remove account rule PAM system-auth
+  lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: 'default=bad success=ok user_unknown=ignore'
+    state: absent
+
+- name: Remove account rule PAM password-auth
+  lineinfile:
+    path: /etc/pam.d/password-auth
+    regexp: 'default=bad success=ok user_unknown=ignore'
+    state: absent
+
+- name: Configure SSSD to use AD for authentication
+  template: 
+    src: sssd.conf.j2 
+    dest: /etc/sssd/sssd.conf
+    owner: root 
+    group: root 
+    mode: 0600
+    backup: yes
+  notify: restart sssd
+
+- name: Ensure SSSD is started and enabled on boot
+  service: 
+    name: sssd 
+    state: started 
+    enabled: yes
+
+- name: Ensure oddjobd for mkhomedir is started and enabled on boot
+  service: 
+    name: oddjobd 
+    state: started 
+    enabled: yes

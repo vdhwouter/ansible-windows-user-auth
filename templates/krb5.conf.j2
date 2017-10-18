@@ -1,0 +1,36 @@
+[libdefaults]
+    default_realm   =   {{ adauth_realm | upper }}
+    clockskew       =   300
+    ticket_lifetime =   1d
+    forwardable     =   true
+    proxiable       =   true
+    dns_lookup_realm =  true
+    dns_lookup_kdc  =   true
+
+[realms]
+    {{ adauth_realm | upper  }} = {
+        kdc            = {{ adauth_pdc | upper }}
+        admin_server   = {{ adauth_pdc | upper }}
+        default_domain = {{ adauth_realm | upper }}
+    }
+
+[domain_realm]
+    .kerberos.server            = {{ adauth_realm | upper }}
+    .{{ ansible_hostname }}     = {{ adauth_realm | upper }}
+    .{{ adauth_realm | lower }} = {{ adauth_realm | upper }}
+    {{ adauth_realm | lower }}  = {{ adauth_realm | upper }}
+
+[appdefaults]
+    pam = {
+        ticket_lifetime     = 1d
+        renew_lifetime      = 1d
+        forwardable         = true
+        proxiable           = false
+        retain_after_close  = false
+        minimum_uid         = 0
+    }
+
+[logging]
+    default         = FILE:/var/log/krb5libs.log
+    kdc             = FILE:/var/log/kdc.log
+    admin_server    = FILE:/var/log/kadmind.log
